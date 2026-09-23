@@ -122,7 +122,7 @@ htmlcov/
 .nox/
 
 
-# Remove .md & Strip.exe from git tracking if they were previously added
+# Keep README in version control
 *.md
-!DEVELOPMENT.md  # Keep development guide in version control
+!README.md
 strip.exe
