@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatWave — Real-Time Messaging, Done Right</title>
+  <meta name="description" content="ChatWave is a fast, private and reliable messaging platform. Instant sync across devices, voice notes, group chats and reactions — free in your browser.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:url" content="{{ SITE_URL }}/">
+  <meta property="og:title" content="ChatWave — Real-Time Messaging, Done Right">
+  <meta property="og:description" content="Fast, private and reliable messaging. Instant sync across devices, voice notes, group chats and reactions — free in your browser.">
+  <meta property="og:image" content="{{ SITE_URL }}/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ChatWave — Real-time messaging, done right.">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ChatWave — Real-Time Messaging, Done Right">
+  <meta name="twitter:description" content="Fast, private and reliable messaging. Instant sync across devices, voice notes, group chats and reactions.">
+  <meta name="twitter:image" content="{{ SITE_URL }}/static/og-image.png">
+
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a0e;
+      --bg-card: rgba(19, 28, 33, 0.95);
+      --bg-card-hover: rgba(25, 36, 42, 0.95);
+      --text-primary: #f0f2f5;
+      --text-secondary: #8696a0;
+      --accent: #00a884;
+      --accent-gradient: linear-gradient(135deg, #00a884 0%, #00d2ff 100%);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABkCAMAAADqvX3PAAAAKlBMVEUAAADX19fX19fBwcHT09PX19fW1tbT09PW1tbV1dXOzs7Ozs7BwcHV1dX5uIg2AAAADnRSTlMAPQAKH0czAAApFAAAAHys1goAAAHwSURBVHja7ZfdcuMwCEb1GUIDcd//dZuk2n5rZzCKOzuzFzo3+XNOBAIHtQosxwi0XUw/jjh2qN1pVzV43FJwJIDLuq5tvaNmzxeEZI5wWP/p9v0gypgGYhGH8fL28yyM7ycOJkFlJW3tZDHhRdBjIO22JR6a1BGMgTAWopvr6BC1jSB1MDWyXYfvkpDlg4iiV83lITiuoXZL+U4/ltcNq2MhogaYBWMYjYU8HHfSRdTrCIOLYImemrfz8dMO6DlVGYyFMWz3tmuGY6GgO1ikXVM51JDXurBO0nyEcyPTnvOXvmyb0hzqfV64jUUYw47Re9CZe6EbeC+M39+TcfK/gTFZuxZgOSag7aMASwGkrQW1Y2lLwXRMx3RMx3T8Pw67FpSOcA5RCccOcTMNL05aRw7Fn2kizA7+1VNH6ENAOBgOxiIK888dHPVqh+Q/yeknzQfHkhx+nqyjT0QFzDUd2Skp53lp7PdFnEkYIhzQv/KRzJUV0QdDSON5+S14CEW0vqSTiAPWWDknCLsY0BZxnNP0L/Z9YQEO8yznXZ2yNwfgTu7rNFgj9aamvS9eZljMTNOeoybSGNwQkvZ+3XrCU07t4HmWSBjDLBzEwdSzhMYcRPRZNYmgdjA1FyahcKQIqpKZs8N0TMd0TMd0/BvHF8n9f8tHo7HcAAAAAElFTkSuQmCC');
+      opacity: 0.04;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow {
+      position: fixed;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0, 168, 132, 0.1) 0%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* NAVBAR */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 60px;
+      z-index: 100;
+      background: rgba(7, 10, 14, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-brand svg { width: 28px; height: 28px; fill: var(--accent); }
+    .nav-brand span { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+
+    .btn-nav {
+      background: var(--accent-gradient);
+      color: #000;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 10px;
+      transition: 0.3s;
+      white-space: nowrap;
+      display: inline-block;
+    }
+    .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 168, 132, 0.35); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 110px 20px 80px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 168, 132, 0.1);
+      color: var(--accent);
+      padding: 7px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      border: 1px solid rgba(0, 168, 132, 0.2);
+    }
+    .hero-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .hero h1 {
+      font-size: 60px;
+      font-weight: 800;
+      letter-spacing: -2.5px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #f0f2f5 30%, #8696a0 120%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 18px;
+      max-width: 620px;
+      margin: 0 auto 40px;
+      line-height: 1.75;
+    }
+
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #000;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 17px 40px;
+      border-radius: 14px;
+      transition: 0.3s;
+      display: inline-block;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0, 168, 132, 0.4); }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 17px 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: 0.3s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); }
+
+    /* FEATURES */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    .section-title { text-align: center; margin-bottom: 56px; }
+    .section-title h2 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+    .section-title p { color: var(--text-secondary); font-size: 16px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 168, 132, 0.35);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+      background: var(--bg-card-hover);
+    }
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 15px;
+      background: rgba(0, 168, 132, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .card h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.3px; }
+    .card p { color: var(--text-secondary); font-size: 14.5px; line-height: 1.75; }
+
+    /* STATS STRIP */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      position: relative;
+      z-index: 10;
+    }
+    .stat {
+      text-align: center;
+      padding: 28px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+    }
+    .stat b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat span { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+
+    /* CTA BANNER */
+    .cta {
+      margin: 0 auto 90px;
+      max-width: 1200px;
+      width: calc(100% - 40px);
+      background: linear-gradient(135deg, rgba(0, 168, 132, 0.14) 0%, rgba(0, 210, 255, 0.07) 100%);
+      border: 1px solid rgba(0, 168, 132, 0.28);
+      border-radius: 26px;
+      padding: 60px 40px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+    .cta h2 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+    .cta p { color: var(--text-secondary); font-size: 16px; margin-bottom: 30px; }
+
+    /* FOOTER */
+    .page-footer {
+      margin-top: auto;
+      background: rgba(13, 19, 23, 0.9);
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 56px 20px 28px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .footer-brand p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.75;
+      margin-top: 14px;
+      max-width: 300px;
+    }
+
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 5px 0;
+      transition: color 0.25s;
+    }
+
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .footer-bottom p { font-size: 13px; color: var(--text-secondary); }
+    .footer-bottom span { color: var(--accent); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .top-nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 70px 20px 60px; }
+      .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
+      .hero p { font-size: 16px; }
+      .section { padding: 56px 20px; }
+      .section-title h2 { font-size: 26px; }
+      .cta { padding: 40px 24px; }
+      .cta h2 { font-size: 24px; }
+      .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; padding: 40px 20px 24px; }
+    }
+
+    @media (max-width: 520px) {
+      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-overlay"></div>
+  <div class="glow" style="top: -250px; left: 30%;"></div>
+
+  <!-- NAVBAR -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9l4.982-1.238C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.477 0-2.873-.406-4.077-1.11l-.292-.172-3.036.755.768-2.946-.188-.316A7.953 7.953 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"></path>
+      </svg>
+      <span>ChatWave</span>
+    </a>
+    <div class="nav-links">
+      <a href="/info/features/">Features</a>
+      <a href="/info/news/">News</a>
+      <a href="/info/careers/">Careers</a>
+      <a href="/info/help/">Help Center</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/api/login/" class="btn-nav">Sign In</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-badge">Real-time chat, groups, voice notes & more</div>
+    <h1>Real-time messaging,<br><em>done right.</em></h1>
+    <p>ChatWave is a fast, private and reliable messaging platform. Instant sync across devices, voice notes, group chats and reactions — all wrapped in a beautiful, distraction-free interface.</p>
+    <div class="hero-cta">
+      <a href="/api/login/" class="btn-primary">Start Chatting Free</a>
+      <a href="/info/features/" class="btn-ghost">Explore Features</a>
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><b>Real-time</b><span>Instant delivery</span></div>
+    <div class="stat"><b>Private</b><span>Blocking & reporting</span></div>
+    <div class="stat"><b>Free</b><span>No credit card</span></div>
+    <div class="stat"><b>Web</b><span>Works in your browser</span></div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <div class="section-title">
+      <h2>Everything you need to stay connected</h2>
+      <p>Built for speed. Designed for privacy.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Instant Delivery</h3>
+        <p>Messages arrive instantly over persistent WebSocket connections — no refresh, no waiting.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h3>Private by Design</h3>
+        <p>Secure accounts, user blocking and reporting tools help keep your conversations yours.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <h3>Groups Made Easy</h3>
+        <p>Create groups, manage members with granular admin controls and keep everyone in the loop.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎤</div>
+        <h3>Voice Notes</h3>
+        <p>Tap to record with a live timer, then send — voice messages right from the input bar.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">😀</div>
+        <h3>Reactions</h3>
+        <p>Say more with emoji reactions — heart, laugh, wow, sad, angry and like on any message.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌓</div>
+        <h3>Dark & Light</h3>
+        <p>A carefully crafted interface with theme switching and a distraction-free reading experience.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2>Ready to ride the wave?</h2>
+    <p>Create your free account in seconds — no credit card required.</p>
+    <a href="/api/login/" class="btn-primary">Get Started Now</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="nav-brand">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9l4.982-1.238C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.477 0-2.873-.406-4.077-1.11l-.292-.172-3.036.755.768-2.946-.188-.316A7.953 7.953 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"></path>
+          </svg>
+          <span>ChatWave</span>
+        </a>
+        <p>Fast, private and reliable real-time messaging — right in your browser. No downloads, no hassle.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="/info/features/">Features</a>
+        <a href="/info/news/">News & Updates</a>
+        <a href="/app/">Open App</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="/info/help/">Help Center</a>
+        <a href="mailto:support@chatwave.com?subject=Report%20an%20Issue">Report an Issue</a>
+        <a href="mailto:support@chatwave.com?subject=Security">Security</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="/info/careers/">Careers</a>
+        <a href="mailto:careers@chatwave.com">Join the Team</a>
+        <a href="mailto:support@chatwave.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 <span>ChatWave</span>. All rights reserved. · Designed & Developed by <span>Munjur Alom</span></p>
+    </div>
+  </footer>
+
+</body>
+</html>

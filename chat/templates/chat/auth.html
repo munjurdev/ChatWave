@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChatWave | Secure Access</title>
+    <meta name="description" content="Sign in to ChatWave — fast, private and reliable real-time messaging in your browser.">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ SITE_NAME }}">
+    <meta property="og:url" content="{{ SITE_URL }}/api/login/">
+    <meta property="og:title" content="ChatWave | Secure Access">
+    <meta property="og:description" content="Sign in to ChatWave — fast, private and reliable real-time messaging in your browser.">
+    <meta property="og:image" content="{{ SITE_URL }}/static/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="ChatWave — Real-time messaging, done right.">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ChatWave | Secure Access">
+    <meta name="twitter:description" content="Sign in to ChatWave — fast, private and reliable real-time messaging in your browser.">
+    <meta name="twitter:image" content="{{ SITE_URL }}/static/og-image.png">
+
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a0e;
+      --bg-card: rgba(19, 28, 33, 0.95);
+      --text-primary: #f0f2f5;
+      --text-secondary: #8696a0;
+      --accent: #00a884;
+      --accent-gradient: linear-gradient(135deg, #00a884 0%, #00d2ff 100%);
+      --border: rgba(255, 255, 255, 0.08);
+      --danger: #ff4b4b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100dvh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      overflow-y: auto;
+    }
+
+    /* Bare inputs (no .input-wrapper icon) need no extra left padding */
+    input:not(.input-wrapper input) {
+      padding-left: 16px !important;
+    }
+
+    /* Password fields with a visibility toggle */
+    .input-wrapper.has-toggle input {
+      padding-right: 46px;
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .pw-toggle:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Higher specificity than '.input-wrapper svg' (which sets left:16px) */
+    .input-wrapper .pw-toggle svg {
+      position: static;
+      left: auto;
+      width: 20px;
+      height: 20px;
+      fill: var(--text-secondary);
+      transition: 0.3s;
+    }
+
+    .input-wrapper .pw-toggle:hover svg {
+      fill: var(--accent);
+    }
+
+    /* PREMIUM TOP NAVIGATION */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 60px;
+      z-index: 100;
+      background: rgba(7, 10, 14, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-brand svg { width: 28px; height: 28px; fill: var(--accent); }
+    .nav-brand span { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+    .nav-links a:hover { 
+      color: #fff; 
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .news-badge {
+      background: rgba(0, 168, 132, 0.1);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 5px;
+    }
+
+    /* BACKGROUND ELEMENTS */
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABkCAMAAADqvX3PAAAAKlBMVEUAAADX19fX19fBwcHT09PX19fW1tbT09PW1tbV1dXOzs7Ozs7BwcHV1dX5uIg2AAAADnRSTlMAPQAKH0czAAApFAAAAHys1goAAAHwSURBVHja7ZfdcuMwCEb1GUIDcd//dZuk2n5rZzCKOzuzFzo3+XNOBAIHtQosxwi0XUw/jjh2qN1pVzV43FJwJIDLuq5tvaNmzxeEZI5wWP/p9v0gypgGYhGH8fL28yyM7ycOJkFlJW3tZDHhRdBjIO22JR6a1BGMgTAWopvr6BC1jSB1MDWyXYfvkpDlg4iiV83lITiuoXZL+U4/ltcNq2MhogaYBWMYjYU8HHfSRdTrCIOLYImemrfz8dMO6DlVGYyFMWz3tmuGY6GgO1ikXVM51JDXurBO0nyEcyPTnvOXvmyb0hzqfV64jUUYw47Re9CZe6EbeC+M39+TcfK/gTFZuxZgOSag7aMASwGkrQW1Y2lLwXRMx3RMx3T8Pw67FpSOcA5RCccOcTMNL05aRw7Fn2kizA7+1VNH6ENAOBgOxiIK888dHPVqh+Q/yeknzQfHkhx+nqyjT0QFzDUd2Skp53lp7PdFnEkYIhzQv/KRzJUV0QdDSON5+S14CEW0vqSTiAPWWDknCLsY0BZxnNP0L/Z9YQEO8yznXZ2yNwfgTu7rNFgj9aamvS9eZljMTNOeoybSGNwQkvZ+3XrCU07t4HmWSBjDLBzEwdSzhMYcRPRZNYmgdjA1FyahcKQIqpKZs8N0TMd0TMd0/BvHF8n9f8tHo7HcAAAAAElFTkSuQmCC');
+      opacity: 0.04;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow {
+      position: fixed;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0, 168, 132, 0.08) 0%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* CENTERED CONTENT */
+    .main-container {
+      flex: 1;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      position: relative;
+      padding-top: 70px; /* Space for fixed header */
+    }
+
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Ensure margins are respected */
+      padding: 0 20px;
+      min-height: 100%;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      animation: zoomInFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      margin-top: 50px; /* Compact top gap */
+      margin-bottom: 30px; /* Compact bottom gap */
+    }
+
+    @keyframes zoomInFade {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .form-title {
+      font-size: 26px; /* Slightly smaller title */
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 30px; /* Reduced gap */
+    }
+
+    .form-group { margin-bottom: 20px; } /* Tighter spacing */
+    
+    label {
+      display: block;
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper svg {
+      position: absolute;
+      left: 16px;
+      width: 18px;
+      height: 18px;
+      fill: var(--text-secondary);
+      transition: 0.3s;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 14px 16px 14px 46px; /* Space for icon */
+      border-radius: 12px;
+      outline: none;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      background: rgba(0, 168, 132, 0.04);
+      box-shadow: 0 0 0 4px rgba(0, 168, 132, 0.1);
+    }
+
+    input:focus + svg {
+      fill: var(--accent);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent-gradient);
+      color: #000;
+      border: none;
+      padding: 18px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(0, 168, 132, 0.4);
+    }
+
+    /* SOCIAL LOGIN */
+    .social-divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: rgba(255, 255, 255, 0.1);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .social-divider::before, .social-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .social-divider span { padding: 0 15px; }
+
+    .social-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-social {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+    .btn-social:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .btn-social svg { width: 18px; height: 18px; }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .footer-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 5px;
+      transition: 0.3s;
+    }
+    .footer-links a:hover { text-decoration: underline; }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 18px;
+      text-align: center;
+      background: rgba(255, 75, 75, 0.08);
+      padding: 12px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    /* FOOTER STYLES */
+    .auth-footer {
+      width: 100%;
+      padding: 16px 20px;
+      text-align: center;
+      margin-top: auto;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-text span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      .top-nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .auth-card { padding: 36px 24px; }
+      .auth-footer { position: relative; background: transparent; padding-top: 0; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="bg-overlay"></div>
+  <div class="glow" style="top: -200px; left: -200px;"></div>
+  <div class="glow" style="bottom: -200px; right: -200px; background: radial-gradient(circle, rgba(0, 210, 255, 0.05) 0%, transparent 70%);"></div>
+
+  <!-- TOP NAVIGATION -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9l4.982-1.238C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.477 0-2.873-.406-4.077-1.11l-.292-.172-3.036.755.768-2.946-.188-.316A7.953 7.953 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"></path>
+      </svg>
+      <span>ChatWave</span>
+    </a>
+    <div class="nav-links">
+      <a href="/info/news/">News</a>
+      <a href="/info/features/">Features</a>
+      <a href="/info/careers/">Careers</a>
+      <a href="/info/help/">Help Center</a>
+    </div>
+  </nav>
+
+  <!-- Info pages (News/Features/Careers/Help) now live at /info/<section>/ -->
+
+  <main class="main-container">
+    <div class="content-wrapper">
+      <div class="auth-card">
+        
+        <!-- SIGN IN -->
+        <div id="signinForm">
+          <h2 class="form-title">Continue to ChatWave</h2>
+          <p class="subtitle">Securely access your workspace and conversations.</p>
+          
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              <input type="email" id="si-email" placeholder="name@example.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper has-toggle">
+              <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+              <input type="password" id="si-pass" placeholder="••••••••">
+              <span class="pw-toggle" data-target="si-pass" onclick="togglePasswordVisibility('si-pass', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="error-msg" id="si-err"></div>
+          <button class="btn-submit" onclick="signIn()">Sign In</button>
+
+          <div class="footer-links">
+            Don't have an account? <a onclick="toggleForm('signupForm')">Create one</a>
+          </div>
+          <div class="footer-links" style="margin-top: 14px;">
+            <a onclick="toggleForm('forgotForm')">Forgot password?</a>
+          </div>
+        </div>
+
+        <!-- SIGN UP -->
+        <div id="signupForm" style="display:none">
+          <h2 class="form-title">Start your journey</h2>
+          <p class="subtitle">Experience the future of seamless messaging.</p>
+          
+          <div class="form-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <input type="text" id="su-name" placeholder="John Doe">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              <input type="email" id="su-email" placeholder="name@example.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper has-toggle">
+              <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+              <input type="password" id="su-pass" placeholder="••••••••">
+              <span class="pw-toggle" data-target="su-pass" onclick="togglePasswordVisibility('su-pass', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="error-msg" id="su-err"></div>
+          <button class="btn-submit" onclick="signUp()">Create Account</button>
+          
+          <div class="footer-links">
+            Already a member? <a onclick="toggleForm('signinForm')">Log in</a>
+          </div>
+        </div>
+
+        <!-- FORGOT PASSWORD -->
+        <div id="forgotForm" style="display:none">
+          <h2 class="form-title">Reset password</h2>
+          <p class="subtitle">Enter your email for a verification code.</p>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="forgot-email" placeholder="name@example.com">
+          </div>
+          <div class="error-msg" id="forgot-err"></div>
+          <button class="btn-submit" onclick="requestReset()">Send Code</button>
+          <div class="footer-links"><a onclick="toggleForm('signinForm')">Back to Sign In</a></div>
+        </div>
+
+        <!-- VERIFY RESET CODE -->
+        <div id="verifyResetForm" style="display:none">
+          <h2 class="form-title">Verify code</h2>
+          <p class="subtitle">Check your email for the 6-digit code.</p>
+          <div class="form-group">
+            <label>Security Code</label>
+            <input type="text" id="reset-code" placeholder="123456" maxlength="6" style="text-align: center; letter-spacing: 12px; font-weight: 700; font-size: 24px;">
+          </div>
+          <div class="error-msg" id="vreset-err"></div>
+          <button class="btn-submit" onclick="verifyResetCode()">Verify & Continue</button>
+          <div class="footer-links"><a onclick="toggleForm('forgotForm')">Resend code</a></div>
+        </div>
+
+        <!-- RESET PASSWORD -->
+        <div id="resetPassForm" style="display:none">
+          <h2 class="form-title">New password</h2>
+          <p class="subtitle">Set a secure password for your account.</p>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="new-pass" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirm-pass" placeholder="••••••••">
+          </div>
+          <div class="error-msg" id="reset-err"></div>
+          <button class="btn-submit" onclick="resetPassword()">Update Password</button>
+        </div>
+
+        <!-- OTP VERIFICATION -->
+        <div id="otpForm" style="display:none">
+          <h2 class="form-title">Verify email</h2>
+          <p class="subtitle">Enter the code we sent to your inbox.</p>
+          <div class="form-group">
+            <label>Verification Code</label>
+            <input type="text" id="otp-code" placeholder="123456" maxlength="6" style="text-align: center; letter-spacing: 12px; font-weight: 700; font-size: 24px;">
+          </div>
+          <div class="error-msg" id="otp-err"></div>
+          <button class="btn-submit" onclick="verifyOtp()">Complete Registration</button>
+          <div class="footer-links"><a onclick="toggleForm('signinForm')">Back to Sign In</a></div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="auth-footer">
+        <p class="footer-text">
+          &copy; 2026 <span>ChatWave</span>. All rights reserved.
+          &nbsp; | &nbsp; Designed & Developed by <span>Munjur Alom</span>
+        </p>
+      </footer>
+    </div>
+  </main>
+
+<script>
+  function togglePasswordVisibility(inputId, el) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    el.innerHTML = isHidden
+      ? '<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.21 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2z"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
+  }
+
+  const getBase = () => window.location.origin;
+  let tempUserId = null;
+
+  function toggleForm(formId) {
+    const forms = ['signinForm', 'signupForm', 'otpForm', 'forgotForm', 'verifyResetForm', 'resetPassForm'];
+    forms.forEach(f => {
+      document.getElementById(f).style.display = (f === formId) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.error-msg').forEach(e => e.style.display = 'none');
+  }
+
+  function showError(prefix, msg) {
+    const el = document.getElementById(`${prefix}-err`);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function saveAndRedirect(access) {
+    localStorage.setItem('chatwave_token', access);
+    window.location.href = '/app/';
+  }
+
+  async function signIn() {
+    const email = document.getElementById('si-email').value;
+    const password = document.getElementById('si-pass').value;
+    if(!email || !password) return showError('si', 'Fields required.');
+    const res = await fetch(`${getBase()}/api/auth/sign-in`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email_address: email, password })
+    });
+    const data = await res.json();
+    if(res.ok && data.status === 'success') saveAndRedirect(data.data.tokens.access);
+    else showError('si', data.message || 'Login failed.');
+  }
+
+  async function signUp() {
+    const email = document.getElementById('su-email').value;
+    const password = document.getElementById('su-pass').value;
+    const name = document.getElementById('su-name').value;
+    if(!email || !password || !name) return showError('su', 'Fields required.');
+    const res = await fetch(`${getBase()}/api/auth/sign-up`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email_address: email, password, full_name: name })
+    });
+    const data = await res.json();
+    if((res.ok || res.status === 201) && data.status === 'success') {
+      tempUserId = data.data.user_id;
+      toggleForm('otpForm');
+    } else showError('su', data.message || 'Signup failed.');
+  }
+
+  async function verifyOtp() {
+    const code = document.getElementById('otp-code').value;
+    if(!code || !tempUserId) return showError('otp', 'Invalid code.');
+    const res = await fetch(`${getBase()}/api/auth/verify-email`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: tempUserId, verification_code: code })
+    });
+    const data = await res.json();
+    if(res.ok && data.status === 'success') saveAndRedirect(data.data.tokens.access);
+    else showError('otp', data.message || 'Failed.');
+  }
+
+  let resetSecretKey = null;
+  async function requestReset() {
+    const email = document.getElementById('forgot-email').value;
+    if(!email) return showError('forgot', 'Email required.');
+    const res = await fetch(`${getBase()}/api/auth/forgot-password`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email_address: email })
+    });
+    const data = await res.json();
+    if(res.ok) {
+      tempUserId = data.data.user_id;
+      toggleForm('verifyResetForm');
+    } else showError('forgot', data.message || 'User not found.');
+  }
+
+  async function verifyResetCode() {
+    const code = document.getElementById('reset-code').value;
+    if(!code) return showError('vreset', 'Code required.');
+    const res = await fetch(`${getBase()}/api/auth/verify-reset-code`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: tempUserId, verification_code: code })
+    });
+    const data = await res.json();
+    if(res.ok) {
+      resetSecretKey = data.data.secret_key;
+      toggleForm('resetPassForm');
+    } else showError('vreset', data.message || 'Invalid code.');
+  }
+
+  async function resetPassword() {
+    const p1 = document.getElementById('new-pass').value;
+    const p2 = document.getElementById('confirm-pass').value;
+    if(!p1 || !p2) return showError('reset', 'Fields required.');
+    if(p1 !== p2) return showError('reset', 'Mismatch.');
+    const res = await fetch(`${getBase()}/api/auth/reset-password`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: tempUserId, secret_key: resetSecretKey, new_password: p1, confirm_password: p2
+      })
+    });
+    const data = await res.json();
+    if(res.ok) {
+      alert("Password updated.");
+      toggleForm('signinForm');
+    } else showError('reset', data.message || 'Reset failed.');
+  }
+
+  if(localStorage.getItem('chatwave_token')) window.location.href = '/app/';
+</script>
+</body>
+</html>

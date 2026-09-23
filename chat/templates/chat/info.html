@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_description }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:url" content="{{ SITE_URL }}/info/{{ section }}/">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_description }}">
+  <meta property="og:image" content="{{ SITE_URL }}/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ChatWave — Real-time messaging, done right.">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_description }}">
+  <meta name="twitter:image" content="{{ SITE_URL }}/static/og-image.png">
+
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a0e;
+      --bg-card: rgba(19, 28, 33, 0.95);
+      --bg-card-hover: rgba(25, 36, 42, 0.95);
+      --text-primary: #f0f2f5;
+      --text-secondary: #8696a0;
+      --accent: #00a884;
+      --accent-gradient: linear-gradient(135deg, #00a884 0%, #00d2ff 100%);
+      --border: rgba(255, 255, 255, 0.08);
+      --danger: #ff4b4b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABkCAMAAADqvX3PAAAAKlBMVEUAAADX19fX19fBwcHT09PX19fW1tbT09PW1tbV1dXOzs7Ozs7BwcHV1dX5uIg2AAAADnRSTlMAPQAKH0czAAApFAAAAHys1goAAAHwSURBVHja7ZfdcuMwCEb1GUIDcd//dZuk2n5rZzCKOzuzFzo3+XNOBAIHtQosxwi0XUw/jjh2qN1pVzV43FJwJIDLuq5tvaNmzxeEZI5wWP/p9v0gypgGYhGH8fL28yyM7ycOJkFlJW3tZDHhRdBjIO22JR6a1BGMgTAWopvr6BC1jSB1MDWyXYfvkpDlg4iiV83lITiuoXZL+U4/ltcNq2MhogaYBWMYjYU8HHfSRdTrCIOLYImemrfz8dMO6DlVGYyFMWz3tmuGY6GgO1ikXVM51JDXurBO0nyEcyPTnvOXvmyb0hzqfV64jUUYw47Re9CZe6EbeC+M39+TcfK/gTFZuxZgOSag7aMASwGkrQW1Y2lLwXRMx3RMx3T8Pw67FpSOcA5RCccOcTMNL05aRw7Fn2kizA7+1VNH6ENAOBgOxiIK888dHPVqh+Q/yeknzQfHkhx+nqyjT0QFzDUd2Skp53lp7PdFnEkYIhzQv/KRzJUV0QdDSON5+S14CEW0vqSTiAPWWDknCLsY0BZxnNP0L/Z9YQEO8yznXZ2yNwfgTu7rNFgj9aamvS9eZljMTNOeoybSGNwQkvZ+3XrCU07t4HmWSBjDLBzEwdSzhMYcRPRZNYmgdjA1FyahcKQIqpKZs8N0TMd0TMd0/BvHF8n9f8tHo7HcAAAAAElFTkSuQmCC');
+      opacity: 0.04;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow {
+      position: fixed;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0, 168, 132, 0.08) 0%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* TOP NAVIGATION */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 60px;
+      z-index: 100;
+      background: rgba(7, 10, 14, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-brand svg { width: 28px; height: 28px; fill: var(--accent); }
+    .nav-brand span { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+    .nav-links a.active { color: var(--accent); background: rgba(0, 168, 132, 0.08); }
+
+    .btn-nav {
+      background: var(--accent-gradient);
+      color: #000;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 10px;
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+    .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 168, 132, 0.35); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 70px 20px 50px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      background: rgba(0, 168, 132, 0.1);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #f0f2f5 0%, #8696a0 130%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      animation: riseIn 0.5s ease backwards;
+    }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.12s; }
+    .card:nth-child(3) { animation-delay: 0.19s; }
+    .card:nth-child(4) { animation-delay: 0.26s; }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 168, 132, 0.35);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+      background: var(--bg-card-hover);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 168, 132, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(0, 168, 132, 0.08);
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      letter-spacing: -0.3px;
+    }
+
+    .card p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .card-date {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-date::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .card-tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .card-tags span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 14px;
+    }
+
+    /* Help page list style */
+    .help-list { display: flex; flex-direction: column; gap: 14px; }
+    .help-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 26px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      transition: all 0.3s ease;
+      animation: riseIn 0.5s ease backwards;
+    }
+    .help-item:nth-child(2) { animation-delay: 0.1s; }
+    .help-item:nth-child(3) { animation-delay: 0.2s; }
+    .help-item:hover { border-color: rgba(0, 168, 132, 0.35); transform: translateX(6px); }
+    .help-item .card-icon { margin-bottom: 0; flex-shrink: 0; width: 44px; height: 44px; font-size: 20px; }
+    .help-item h3 { font-size: 16px; margin-bottom: 4px; }
+    .help-item p { font-size: 13.5px; }
+    .help-item .chevron { margin-left: auto; color: var(--text-secondary); flex-shrink: 0; }
+
+    /* CTA BANNER */
+    .cta {
+      margin-top: 50px;
+      background: linear-gradient(135deg, rgba(0, 168, 132, 0.12) 0%, rgba(0, 210, 255, 0.06) 100%);
+      border: 1px solid rgba(0, 168, 132, 0.25);
+      border-radius: 24px;
+      padding: 44px 40px;
+      text-align: center;
+    }
+    .cta h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .cta p { color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; }
+    .cta .btn-nav { display: inline-block; font-size: 15px; padding: 14px 34px; }
+
+    /* FOOTER */
+    .page-footer {
+      margin-top: auto;
+      background: rgba(13, 19, 23, 0.9);
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 56px 20px 28px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .footer-brand p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.75;
+      margin-top: 14px;
+      max-width: 300px;
+    }
+
+    .footer-brand .nav-brand { display: inline-flex; }
+
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 5px 0;
+      transition: color 0.25s;
+    }
+
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .footer-bottom p { font-size: 13px; color: var(--text-secondary); }
+    .footer-bottom span { color: var(--accent); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .top-nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero h1 { font-size: 30px; }
+      .hero { padding: 46px 20px 36px; }
+      .cta { padding: 32px 22px; }
+      .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; padding: 40px 20px 24px; }
+    }
+
+    @media (max-width: 520px) {
+      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-overlay"></div>
+  <div class="glow" style="top: -220px; left: -180px;"></div>
+  <div class="glow" style="bottom: -220px; right: -180px; background: radial-gradient(circle, rgba(0, 210, 255, 0.05) 0%, transparent 70%);"></div>
+
+  <!-- NAVIGATION -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9l4.982-1.238C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.477 0-2.873-.406-4.077-1.11l-.292-.172-3.036.755.768-2.946-.188-.316A7.953 7.953 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"></path>
+      </svg>
+      <span>ChatWave</span>
+    </a>
+    <div class="nav-links">
+      <a href="/info/news/" class="{% if section == 'news' %}active{% endif %}">News</a>
+      <a href="/info/features/" class="{% if section == 'features' %}active{% endif %}">Features</a>
+      <a href="/info/careers/" class="{% if section == 'careers' %}active{% endif %}">Careers</a>
+      <a href="/info/help/" class="{% if section == 'help' %}active{% endif %}">Help Center</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/api/login/" class="btn-nav">Sign In</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    {% if section == 'news' %}
+      <div class="hero-eyebrow">What's New</div>
+      <h1>Latest Updates</h1>
+      <p>Product releases, security improvements and platform upgrades — everything shipping on ChatWave.</p>
+    {% elif section == 'features' %}
+      <div class="hero-eyebrow">Platform</div>
+      <h1>Built for Real-Time Conversations</h1>
+      <p>Everything you need for fast, private and reliable messaging — on every device.</p>
+    {% elif section == 'careers' %}
+      <div class="hero-eyebrow">We're Hiring</div>
+      <h1>Join Our Team</h1>
+      <p>Help us build the future of real-time messaging. Remote-first, globally distributed.</p>
+    {% else %}
+      <div class="hero-eyebrow">Support</div>
+      <h1>How Can We Help?</h1>
+      <p>Guides, documentation and direct support — find what you need in minutes.</p>
+    {% endif %}
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    {% if section == 'news' %}
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <span class="card-tag">Release</span>
+        <h3>Platform Version 2.4</h3>
+        <p>A faster, more reliable core with real-time WebSocket messaging, read receipts and delivery ticks.</p>
+        <div class="card-date">September 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <span class="card-tag">Safety</span>
+        <h3>Safer Conversations</h3>
+        <p>Block or report any user in one tap — blocked users can no longer message you.</p>
+        <div class="card-date">August 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎤</div>
+        <span class="card-tag">Media</span>
+        <h3>Voice Notes & File Sharing</h3>
+        <p>Record voice notes with a live timer and share files up to 10MB right inside any chat.</p>
+        <div class="card-date">July 2026</div>
+      </div>
+    </div>
+
+    {% elif section == 'features' %}
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Real-Time Synchronization</h3>
+        <p>Messages sync instantly across all your devices over our persistent WebSocket layer — no refresh, no delay.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <h3>Advanced Group Management</h3>
+        <p>Granular admin controls, member management and broadcast capabilities for communities of any size.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <h3>Privacy & Safety</h3>
+        <p>Secure email-verified accounts, user blocking and reporting tools keep your conversations comfortable.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎤</div>
+        <h3>Voice & Media</h3>
+        <p>Record voice notes inline, share files up to 10MB and preview images directly in the conversation.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">😀</div>
+        <h3>Message Reactions</h3>
+        <p>Express yourself with emoji reactions on any message — heart, laugh, wow, sad, angry and like.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌓</div>
+        <h3>Dark & Light Themes</h3>
+        <p>A carefully crafted interface with automatic theme switching and a distraction-free reading experience.</p>
+      </div>
+    </div>
+
+    {% elif section == 'careers' %}
+    <div class="grid">
+      <div class="card">
+        <span class="card-tag">Engineering</span>
+        <h3>Senior Backend Engineer</h3>
+        <p>Design and scale our real-time messaging engine (Django, Channels, Redis) to support millions of concurrent users.</p>
+        <div class="card-tags"><span>Full-time</span><span>Remote</span><span>Django</span></div>
+      </div>
+      <div class="card">
+        <span class="card-tag">Design</span>
+        <h3>Lead Product Designer</h3>
+        <p>Craft the next generation of messaging experiences with a focus on high-fidelity motion and accessibility.</p>
+        <div class="card-tags"><span>Full-time</span><span>Remote</span><span>UI/UX</span></div>
+      </div>
+      <div class="card">
+        <span class="card-tag">People</span>
+        <h3>Remote Culture & Benefits</h3>
+        <p>Work from anywhere with competitive salary, equity and an unlimited learning budget for every teammate.</p>
+        <div class="card-tags"><span>Perks</span><span>Equity</span><span>Learning</span></div>
+      </div>
+    </div>
+    <div class="cta">
+      <h2>Don't see your role?</h2>
+      <p>We're always looking for exceptional people. Tell us what you'd bring to ChatWave.</p>
+      <a href="mailto:careers@chatwave.com" class="btn-nav">Get in Touch</a>
+    </div>
+
+    {% else %}
+    <div class="help-list">
+      <div class="help-item">
+        <div class="card-icon">📚</div>
+        <div>
+          <h3>Knowledge Base</h3>
+          <p>Step-by-step guides on chats, groups, voice notes, reactions and account settings.</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </div>
+      <div class="help-item">
+        <div class="card-icon">🔐</div>
+        <div>
+          <h3>Enterprise Security</h3>
+          <p>Learn about our data processing agreements, encryption standards and compliance requirements.</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </div>
+      <div class="help-item">
+        <div class="card-icon">💬</div>
+        <div>
+          <h3>Contact Support</h3>
+          <p>Our support team is available 24/7 — reach out via email or priority chat support.</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </div>
+    </div>
+    <div class="cta">
+      <h2>Still stuck?</h2>
+      <p>Send us a message and we'll get back to you within one business day.</p>
+      <a href="mailto:support@chatwave.com" class="btn-nav">Contact Support</a>
+    </div>
+    {% endif %}
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="nav-brand">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9l4.982-1.238C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.477 0-2.873-.406-4.077-1.11l-.292-.172-3.036.755.768-2.946-.188-.316A7.953 7.953 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"></path>
+          </svg>
+          <span>ChatWave</span>
+        </a>
+        <p>Fast, private and reliable real-time messaging — right in your browser. No downloads, no hassle.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="/info/features/">Features</a>
+        <a href="/info/news/">News & Updates</a>
+        <a href="/app/">Open App</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="/info/help/">Help Center</a>
+        <a href="mailto:support@chatwave.com?subject=Report%20an%20Issue">Report an Issue</a>
+        <a href="mailto:support@chatwave.com?subject=Security">Security</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="/info/careers/">Careers</a>
+        <a href="mailto:careers@chatwave.com">Join the Team</a>
+        <a href="mailto:support@chatwave.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 <span>ChatWave</span>. All rights reserved. · Designed & Developed by <span>Munjur Alom</span></p>
+    </div>
+  </footer>
+
+</body>
+</html>

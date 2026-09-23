@@ -1,0 +1,128 @@
+# ===========================
+# Python / Django / Virtual Env
+# ===========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+env/
+venv/
+ENV/
+.venv/
+pyvenv.cfg
+
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# ===========================
+# Database (PostgreSQL / MySQL)
+# ===========================
+# Ignore local database dumps and backups
+*.dump
+*.sql
+*.backup
+backups/
+dumps/
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+*.db
+
+# ===========================
+# Django migrations (optional)
+# ===========================
+# Ignore migrations if you handle them via CI/CD
+# */migrations/*.py
+# */migrations/*.pyc
+# !*/migrations/__init__.py
+
+# ===========================
+# Static files / Media
+# ===========================
+/staticfiles/
+/media/
+/mediafiles/
+!/static/
+!static/**
+
+# ===========================
+# Secrets / Environment variables
+# ===========================
+.env
+.env.*
+secret_key.txt
+.secret_key
+*.key
+*.pem
+*.crt
+*.cer
+credentials.json
+secrets.json
+
+# ===========================
+# Caches / Temp
+# ===========================
+.cache/
+.pytest_cache/
+.mypy_cache/
+django_cache/
+tmp/
+temp/
+
+# ===========================
+# Celery
+# ===========================
+celerybeat-schedule
+*.pid
+
+# ===========================
+# IDEs / Editors
+# ===========================
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# ===========================
+# OS / System
+# ===========================
+.DS_Store
+Thumbs.db
+*.bak
+*.orig
+*.rej
+
+# ===========================
+# Docker
+# ===========================
+.docker/
+docker-compose.override.yml
+
+# ===========================
+# Node / Frontend
+# ===========================
+node_modules/
+dist/
+build/
+*.map
+
+# ===========================
+# Testing / Coverage
+# ===========================
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+
+# Remove .md & Strip.exe from git tracking if they were previously added
+*.md
+!DEVELOPMENT.md  # Keep development guide in version control
+strip.exe
